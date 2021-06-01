@@ -21,33 +21,22 @@ def main():
             break
         cv2_im = frame
         cv2_im_rgb = cv2.cvtColor(cv2_im, cv2.COLOR_BGR2RGB)
+        cv2_im_rgb = cv2.resize(cv2_im_rgb, (600,400))
         # cv2_im_rgb = cv2.resize(cv2_im_rgb, inference_size)
-        start = time.monotonic() ###added
+        # start = time.monotonic() 
         img, cropped, col = crop_and_label(cv2_im_rgb)
-
-        # run_inference(interpreter, cv2_im_rgb.tobytes())
-        inference_time = time.monotonic() - start ###added
-        # objs = get_objects(interpreter, args.threshold)[:args.top_k]
-        # cv2_im = append_objs_to_img(cv2_im, inference_size, objs, labels, inference_time) ##added inference_time
+        # inference_time = time.monotonic() - start 
 
         cv2.imshow('frame', cv2_im)
         if col:
-            # print("Detected", col, "license plate")
             cv2.imshow(col + ' lincence plate', cropped)
         else:
-            cv2.imshow('detected no lincence plate', img)
-            # print("Need closer image")
+            cv2.imshow(col + ' lincence plate', img)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
-
-    
-    # plt.imshow(cropped)
-#     cv2.imshow('cropped lincence plate', cropped)
-#     cv2.imshow('original image', img)
-
 
 # label with cropped corners only
 def corner_color(Cropped):
@@ -65,8 +54,7 @@ def corner_color(Cropped):
     mean4 = cv2.mean(corner4)[:3]
     arr = np.array([mean1, mean2, mean3, mean4])
     mean = arr.mean(axis=0)
-    mean = mean2
-    # print(mean)
+    mean = mean2 # should be removed?
     minDist = (np.inf, None)
 
     for (i, row) in enumerate(colors):
@@ -79,7 +67,7 @@ def corner_color(Cropped):
 def crop_and_label(img):
     # img = cv2.imread(source, cv2.IMREAD_COLOR)
     # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img = cv2.resize(img, (600,400) )
+    # img = cv2.resize(img, (600,400))
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
     gray = cv2.bilateralFilter(gray, 13, 15, 15) 
@@ -101,7 +89,7 @@ def crop_and_label(img):
     if screenCnt is None:
         detected = 0
         print ("No contour detected")
-        return img, img, None
+        return img, img, 'no'
     else:
          detected = 1
 
@@ -112,7 +100,6 @@ def crop_and_label(img):
         (bottomx, bottomy) = (np.max(x), np.max(y))
         Cropped = img[topx:bottomx+1, topy:bottomy+1]
         cv2.drawContours(img, [screenCnt], -1, (255, 0, 0), 3)
-        col = label(img, screenCnt)
 
     img = cv2.resize(img,(500,300))
     Cropped = cv2.resize(Cropped,(400,200))
@@ -121,8 +108,6 @@ def crop_and_label(img):
     return img, Cropped, col
 
 if __name__ == '__main__':
-    
-    # src = 'example.png'
     main()
 
 
